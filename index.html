@@ -1,0 +1,458 @@
+﻿<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Assetto Corsa Community</title>
+<link rel="stylesheet" href="styles.css"/>
+<link rel="stylesheet" href="theme.css"/>
+
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay">
+<div class="loading-card">
+<img alt="Assetto Corsa Community" class="loading-logo" src="data:image/png;base64,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"/>
+<h2>Bienvenido</h2>
+<p>Espere un momento mientras cargamos la web.</p>
+<div aria-hidden="true" class="loading-spinner"></div>
+</div>
+</div>
+<div class="app">
+<header class="topbar">
+<a class="brand" href="#" onclick="showPage('home')"><img alt="Assetto Corsa Community" class="brand-logo" src="data:image/png;base64,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"/><div class="brand-title">Assetto Corsa Community<span>Rally simracing</span></div></a>
+<nav class="nav">
+<button class="nav-btn active" data-nav="home" onclick="showPage('home')">🏠 Inicio</button>
+<button class="nav-btn" data-nav="news" onclick="showPage('news')">📰 Noticias</button>
+<button class="nav-btn" data-nav="pruebas" onclick="showPage('pruebas')">🏆 Pruebas</button><button class="nav-btn" data-nav="standings" onclick="openStandings()">Clasificaciones</button>
+<a class="nav-btn" href="https://acc-d.github.io/tiempos-online/" rel="noopener noreferrer" target="_blank">⏱ Live Timing</a>
+<button class="nav-btn" data-nav="teams" onclick="showPage('teams')">👥 Equipos</button>
+<button class="nav-btn" data-nav="ranking" onclick="showPage('ranking')">🛡 Ranking SR</button>
+<button class="nav-btn" data-nav="licenses" onclick="showPage('licenses')">🪪 Licencias</button>
+<button class="nav-btn hidden" data-nav="admin" id="adminNavBtn" onclick="openAdmin()">🛠 Admin</button>
+<div class="user-menu" id="userMenu">
+<button class="nav-btn" onclick="toggleUserMenu(event)">👤 Cuenta ▾</button>
+<div class="user-menu-panel">
+<button class="menu-item" id="menuLogin" onclick="showPage('login');closeUserMenu()">Login</button>
+<button class="menu-item" id="menuRegister" onclick="showPage('register');closeUserMenu()">Registro</button>
+<button class="menu-item hidden" id="menuProfile" onclick="openProfile();closeUserMenu()">Mi perfil</button>
+<button class="menu-item hidden" id="menuSafety" onclick="showPage('safety');closeUserMenu()">Mi Safety Rating</button>
+<button class="menu-item hidden" id="menuAdmin" onclick="openAdmin();closeUserMenu()">Panel admin</button>
+<button class="menu-item danger hidden" id="menuLogout" onclick="logoutUser();closeUserMenu()">Cerrar sesión</button>
+</div>
+</div>
+<span class="user-chip" id="userChip"></span>
+</nav>
+</header>
+<main>
+<section class="page active" id="home">
+  <div class="acc-home-hero">
+    <div class="acc-home-content">
+      <p class="eyebrow">Assetto Corsa Community</p>
+      <h1>ACC <span>Rally Simracing</span></h1>
+      <p>El campeonato definitivo para competir, inscribirte en pruebas, seguir eventos y formar parte de equipos de la comunidad.</p>
+      <div class="acc-home-actions">
+        <button class="pill-btn primary" onclick="showPage('pruebas')">Ver pruebas</button>
+        <button class="pill-btn" onclick="showPage('teams')">Únete a un equipo</button>
+      </div>
+      <div class="home-stats">
+        <div><b id="homeStatPilots">—</b><span>Pilotos</span></div>
+        <div><b id="homeStatTeams">—</b><span>Equipos</span></div>
+        <div><b id="homeStatEvents">—</b><span>Pruebas próximas</span></div>
+        <div><b id="homeStatDone">—</b><span>Pruebas disputadas</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-news-wrap hidden" id="homeNewsWrap">
+    <div class="section-head"><div><p class="eyebrow">Actualidad</p><h2>Última noticia</h2></div><button class="pill-btn" onclick="showPage('news')">Ver todas</button></div>
+    <div class="news-grid" id="homeNews"></div>
+  </div>
+
+  <div class="home-news-wrap hidden" id="homeFinishedWrap">
+    <div class="section-head"><div><p class="eyebrow">Resultados</p><h2>Últimas pruebas finalizadas</h2></div><button class="pill-btn" onclick="showPage('pruebas');scrollToFinished()">Ver todas</button></div>
+    <div class="event-grid" id="homeFinished"></div>
+  </div>
+
+  <div class="home-features">
+    <button class="feature-card" onclick="showPage('teams')"><span class="feature-icon">👥</span><b>Únete a un equipo</b><small>Envía tu solicitud al team manager o crea tu propio equipo desde la web.</small></button>
+    <button class="feature-card" onclick="showPage('safety')"><span class="feature-icon">🛡</span><b>Tu Safety Rating</b><small>Sube de licencia (R, D, C, B, A, Pro) corriendo limpio, como en iRacing.</small></button>
+    <button class="feature-card" onclick="showPage('ranking')"><span class="feature-icon">🏆</span><b>Ranking de licencias</b><small>Descubre quién tiene la mejor licencia de la comunidad.</small></button>
+  </div>
+
+  </section>
+
+<section class="page" id="news">
+  <div class="hero"><div class="hero-card"><p class="eyebrow">Organización</p><h1>Noticias</h1><p>Comunicados, novedades de campeonato y toda la actualidad de Assetto Corsa Community.</p></div></div>
+  <div id="newsContent"></div>
+</section>
+<section class="page" id="newsArticle"><div id="newsArticleContent"></div></section>
+
+<section class="page" id="safety">
+  <div class="hero"><div class="hero-card"><p class="eyebrow">Área de piloto</p><h1>Safety Rating y licencia</h1><p>Tu progreso al estilo iRacing: cada prueba limpia suma, los abandonos y las sanciones restan. Sube de clase hasta llegar a Pro.</p></div></div>
+  <div id="safetyContent"></div>
+</section>
+
+<section class="page" id="ranking">
+  <div class="hero"><div class="hero-card"><p class="eyebrow">Comunidad ACC</p><h1>Ranking de licencias</h1><p>Los pilotos con mejor licencia y Safety Rating de la comunidad. Pulsa sobre un piloto para ver su historial.</p></div></div>
+  <div id="rankingContent"></div>
+</section>
+
+<section class="page" id="pruebas">
+<div class="hero">
+<div class="hero-card"><p class="eyebrow">Pruebas</p><h1>Calendario Oficial de Pruebas ACC</h1><p>Accede a cada evento para poder acceder al tablón de anuncios, archivos descargables, inscripciones y sesiones.</p><div><button class="pill-btn primary" onclick="scrollToEvents()">Ver eventos</button><a class="pill-btn" href="https://acc-d.github.io/tiempos-online/" rel="noopener noreferrer" target="_blank">Abrir live timing</a></div></div>
+</div>
+<div class="panel" id="eventsBlock"><div class="panel-head"><div class="panel-title">🏆 Eventos próximos</div><div class="panel-kicker">Assetto Corsa Community</div></div><div class="panel-body"><div class="event-grid" id="eventsGrid"></div></div></div>
+<div class="panel finished-block" id="finishedBlock"><div class="panel-head"><div><div class="panel-title">🏁 Pruebas finalizadas</div><div class="panel-kicker">Resultados por temporada</div></div><div class="chip-row" id="finishedYears"></div></div><div class="panel-body"><div class="event-grid" id="finishedGrid"></div></div></div>
+</section>
+<section class="page" id="standings"><div id="standingsContent"></div></section><section class="page" id="event"><div id="eventContent"></div></section>
+<section class="page" id="login"><div class="form-card"><p class="eyebrow">Acceso pilotos y admin</p><h1>Login</h1><p class="empty">Entra con tu correo y contraseña.</p><div class="form-grid"><div class="field full"><label>Email</label><input id="loginEmail" placeholder="piloto@email.com" type="email"/></div><div class="field full"><label>Contraseña</label><input id="loginPassword" placeholder="Tu contraseña" type="password"/></div></div><div class="form-actions"><button class="ghost-btn" onclick="showPage('register')">Crear cuenta piloto</button><button class="ghost-btn" onclick="resetPassword()">Restablecer contraseña</button><button class="submit-btn" onclick="loginUser()">Entrar</button></div></div></section>
+<section class="page" id="register"><div class="form-card"><p class="eyebrow">Nuevo piloto</p><h1>Registro</h1><p class="empty">Cuando tengas la cuenta podrás pedir tu licencia de piloto en <b>Licencias</b> (se asigna al momento) y solicitar entrar en un equipo o crear el tuyo.</p><div class="form-grid"><div class="field"><label>Nombre</label><input id="regName"/></div><div class="field"><label>Apellido</label><input id="regLastName"/></div><div class="field full"><label>Steam ID</label><input id="regSteam" inputmode="numeric" maxlength="17" oninput="onlyDigits17(this)" pattern="\d{17}" placeholder="17 dígitos"/></div><div class="field"><label>Nacionalidad</label><select id="regNationality" onchange="toggleNationalityFields('regNationality','regCcaaWrap','regNationalityOtherWrap')">
+<option value="Albania">Albania</option>
+<option value="Alemania">Alemania</option>
+<option value="Andorra">Andorra</option>
+<option value="Argentina">Argentina</option>
+<option value="Armenia">Armenia</option>
+<option value="Australia">Australia</option>
+<option value="Austria">Austria</option>
+<option value="Azerbaiyán">Azerbaiyán</option>
+<option value="Bielorrusia">Bielorrusia</option>
+<option value="Bosnia y Herzegovina">Bosnia y Herzegovina</option>
+<option value="Brasil">Brasil</option>
+<option value="Bulgaria">Bulgaria</option>
+<option value="Bélgica">Bélgica</option>
+<option value="Canadá">Canadá</option>
+<option value="Chile">Chile</option>
+<option value="Chipre">Chipre</option>
+<option value="Colombia">Colombia</option>
+<option value="Croacia">Croacia</option>
+<option value="Dinamarca">Dinamarca</option>
+<option value="Eslovaquia">Eslovaquia</option>
+<option value="Eslovenia">Eslovenia</option>
+<option value="España">España</option>
+<option value="Estados Unidos">Estados Unidos</option>
+<option value="Estonia">Estonia</option>
+<option value="Finlandia">Finlandia</option>
+<option value="Francia">Francia</option>
+<option value="Georgia">Georgia</option>
+<option value="Grecia">Grecia</option>
+<option value="Hungría">Hungría</option>
+<option value="Irlanda">Irlanda</option>
+<option value="Islandia">Islandia</option>
+<option value="Italia">Italia</option>
+<option value="Japón">Japón</option>
+<option value="Kazajistán">Kazajistán</option>
+<option value="Kosovo">Kosovo</option>
+<option value="Letonia">Letonia</option>
+<option value="Liechtenstein">Liechtenstein</option>
+<option value="Lituania">Lituania</option>
+<option value="Luxemburgo">Luxemburgo</option>
+<option value="Macedonia del Norte">Macedonia del Norte</option>
+<option value="Malta">Malta</option>
+<option value="Marruecos">Marruecos</option>
+<option value="Moldavia">Moldavia</option>
+<option value="Montenegro">Montenegro</option>
+<option value="México">México</option>
+<option value="Mónaco">Mónaco</option>
+<option value="Noruega">Noruega</option>
+<option value="Nueva Zelanda">Nueva Zelanda</option>
+<option value="Países Bajos">Países Bajos</option>
+<option value="Polonia">Polonia</option>
+<option value="Portugal">Portugal</option>
+<option value="Reino Unido">Reino Unido</option>
+<option value="República Checa">República Checa</option>
+<option value="Rumanía">Rumanía</option>
+<option value="Rusia">Rusia</option>
+<option value="San Marino">San Marino</option>
+<option value="Serbia">Serbia</option>
+<option value="Suecia">Suecia</option>
+<option value="Suiza">Suiza</option>
+<option value="Turquía">Turquía</option>
+<option value="Ucrania">Ucrania</option>
+<option value="Uruguay">Uruguay</option>
+<option value="Vaticano">Vaticano</option>
+</select></div><div class="field hidden" id="regCcaaWrap"><label>Comunidad autónoma</label><select id="regCcaa"></select></div><div class="field hidden" id="regNationalityOtherWrap"><label>Otra nacionalidad</label><input id="regNationalityOther" placeholder="Escribe la nacionalidad"/></div><div class="field"><label>Email</label><input id="regEmail" type="email"/></div><div class="field full"><label>Contraseña</label><input id="regPassword" type="password"/></div></div><div class="form-actions"><button class="ghost-btn" onclick="showPage('home')">Cancelar</button><button class="submit-btn" onclick="registerUser()">Registrarme</button></div></div></section>
+<section class="page" id="entry"><div class="form-card"><p class="eyebrow">Inscripción a prueba</p><h1 id="entryTitle">Inscripción</h1><p class="empty">Recuerda que una vez realizada la inscripción, solo podrás cambiar 1 vez de sesión y de coche</p><div class="form-grid"><div class="field" id="coDriverWrap"><label>Copiloto</label><input id="coDriver"/></div><div class="field" id="coNationalityWrap"><label>Nacionalidad copiloto</label><select id="coNationality" onchange="toggleNationalityFields('coNationality','coCcaaWrap','coNationalityOtherWrap')">
+<option value="Albania">Albania</option>
+<option value="Alemania">Alemania</option>
+<option value="Andorra">Andorra</option>
+<option value="Argentina">Argentina</option>
+<option value="Armenia">Armenia</option>
+<option value="Australia">Australia</option>
+<option value="Austria">Austria</option>
+<option value="Azerbaiyán">Azerbaiyán</option>
+<option value="Bielorrusia">Bielorrusia</option>
+<option value="Bosnia y Herzegovina">Bosnia y Herzegovina</option>
+<option value="Brasil">Brasil</option>
+<option value="Bulgaria">Bulgaria</option>
+<option value="Bélgica">Bélgica</option>
+<option value="Canadá">Canadá</option>
+<option value="Chile">Chile</option>
+<option value="Chipre">Chipre</option>
+<option value="Colombia">Colombia</option>
+<option value="Croacia">Croacia</option>
+<option value="Dinamarca">Dinamarca</option>
+<option value="Eslovaquia">Eslovaquia</option>
+<option value="Eslovenia">Eslovenia</option>
+<option value="España">España</option>
+<option value="Estados Unidos">Estados Unidos</option>
+<option value="Estonia">Estonia</option>
+<option value="Finlandia">Finlandia</option>
+<option value="Francia">Francia</option>
+<option value="Georgia">Georgia</option>
+<option value="Grecia">Grecia</option>
+<option value="Hungría">Hungría</option>
+<option value="Irlanda">Irlanda</option>
+<option value="Islandia">Islandia</option>
+<option value="Italia">Italia</option>
+<option value="Japón">Japón</option>
+<option value="Kazajistán">Kazajistán</option>
+<option value="Kosovo">Kosovo</option>
+<option value="Letonia">Letonia</option>
+<option value="Liechtenstein">Liechtenstein</option>
+<option value="Lituania">Lituania</option>
+<option value="Luxemburgo">Luxemburgo</option>
+<option value="Macedonia del Norte">Macedonia del Norte</option>
+<option value="Malta">Malta</option>
+<option value="Marruecos">Marruecos</option>
+<option value="Moldavia">Moldavia</option>
+<option value="Montenegro">Montenegro</option>
+<option value="México">México</option>
+<option value="Mónaco">Mónaco</option>
+<option value="Noruega">Noruega</option>
+<option value="Nueva Zelanda">Nueva Zelanda</option>
+<option value="Países Bajos">Países Bajos</option>
+<option value="Polonia">Polonia</option>
+<option value="Portugal">Portugal</option>
+<option value="Reino Unido">Reino Unido</option>
+<option value="República Checa">República Checa</option>
+<option value="Rumanía">Rumanía</option>
+<option value="Rusia">Rusia</option>
+<option value="San Marino">San Marino</option>
+<option value="Serbia">Serbia</option>
+<option value="Suecia">Suecia</option>
+<option value="Suiza">Suiza</option>
+<option value="Turquía">Turquía</option>
+<option value="Ucrania">Ucrania</option>
+<option value="Uruguay">Uruguay</option>
+<option value="Vaticano">Vaticano</option>
+</select></div><div class="field hidden" id="coCcaaWrap"><label>Comunidad autónoma copiloto</label><select id="coCcaa"></select></div><div class="field hidden" id="coNationalityOtherWrap"><label>Otra nacionalidad copiloto</label><input id="coNationalityOther" placeholder="Escribe la nacionalidad"/></div><div class="field"><label>Categoría</label><select id="categorySelect"></select></div><div class="field"><label>Coche</label><select id="carSelect" onchange="renderCarPreview()"></select></div><div class="field full hidden" id="carPreview"></div><div class="field full"><label>Sesión</label><select id="sessionSelect"></select></div></div><div class="form-actions"><button class="ghost-btn" onclick="openEvent(currentEventId)">Volver al evento</button><button class="submit-btn" onclick="confirmEntry()">Confirmar inscripción</button></div></div></section>
+<section class="page" id="profile"><div class="profile-wrap"><div class="profile-hub" id="profileHub"></div>
+<div class="panel" id="profileRacesCard"><div class="panel-head"><div><div class="panel-title">🏁 Mis inscripciones</div><div class="panel-kicker">Pruebas a las que estás inscrito y carreras que has corrido</div></div></div><div class="panel-body" id="profileRaces"></div></div>
+<div class="panel profile-team-card" id="profileTeamCard"><div class="panel-head"><div><div class="panel-title">👥 Mi equipo</div><div class="panel-kicker">El team manager decide si te acepta</div></div></div><div class="panel-body">
+<div class="team-preview-card" id="profileTeamCurrent"></div>
+<div id="profileTeamManager"></div>
+<div class="field"><label>Equipos de la comunidad</label><select id="profileTeam"><option value="">Sin equipo</option></select></div>
+<div class="form-actions"><button class="ghost-btn" onclick="leaveTeam()">Salir del equipo</button><button class="ghost-btn" onclick="showPage('createTeam')">Crear mi equipo</button><button class="submit-btn" onclick="joinSelectedTeam()">Enviar solicitud</button></div>
+<div id="profileTeamRequests"></div>
+<p class="admin-help">Tu solicitud le llega al team manager del equipo, que decide si te acepta. Cuando te acepte, el equipo y su licencia se añaden solos a tu perfil.</p>
+</div></div>
+<div class="form-card"><p class="eyebrow">Datos personales</p><h1>Mis datos</h1><div class="form-grid"><div class="field full"><label>Foto de perfil</label><div class="image-field" id="profileAvatarField"></div></div><div class="field"><label>Nombre</label><input id="profileName"/></div><div class="field"><label>Apellido</label><input id="profileLastName"/></div><div class="field"><label>Steam ID</label><input id="profileSteam" inputmode="numeric" maxlength="17" oninput="onlyDigits17(this)" pattern="\d{17}" placeholder="17 dígitos"/></div><div class="field"><label>Licencia de piloto</label><input id="profileLicense" disabled placeholder="Pídela en la sección Licencias"/></div><div class="field"><label>Licencia de equipo</label><input id="profileTeamLicense"/></div><div class="field"><label>Nacionalidad</label><select id="profileNationality" onchange="toggleNationalityFields('profileNationality','profileCcaaWrap','profileNationalityOtherWrap')">
+<option value="Albania">Albania</option>
+<option value="Alemania">Alemania</option>
+<option value="Andorra">Andorra</option>
+<option value="Argentina">Argentina</option>
+<option value="Armenia">Armenia</option>
+<option value="Australia">Australia</option>
+<option value="Austria">Austria</option>
+<option value="Azerbaiyán">Azerbaiyán</option>
+<option value="Bielorrusia">Bielorrusia</option>
+<option value="Bosnia y Herzegovina">Bosnia y Herzegovina</option>
+<option value="Brasil">Brasil</option>
+<option value="Bulgaria">Bulgaria</option>
+<option value="Bélgica">Bélgica</option>
+<option value="Canadá">Canadá</option>
+<option value="Chile">Chile</option>
+<option value="Chipre">Chipre</option>
+<option value="Colombia">Colombia</option>
+<option value="Croacia">Croacia</option>
+<option value="Dinamarca">Dinamarca</option>
+<option value="Eslovaquia">Eslovaquia</option>
+<option value="Eslovenia">Eslovenia</option>
+<option value="España">España</option>
+<option value="Estados Unidos">Estados Unidos</option>
+<option value="Estonia">Estonia</option>
+<option value="Finlandia">Finlandia</option>
+<option value="Francia">Francia</option>
+<option value="Georgia">Georgia</option>
+<option value="Grecia">Grecia</option>
+<option value="Hungría">Hungría</option>
+<option value="Irlanda">Irlanda</option>
+<option value="Islandia">Islandia</option>
+<option value="Italia">Italia</option>
+<option value="Japón">Japón</option>
+<option value="Kazajistán">Kazajistán</option>
+<option value="Kosovo">Kosovo</option>
+<option value="Letonia">Letonia</option>
+<option value="Liechtenstein">Liechtenstein</option>
+<option value="Lituania">Lituania</option>
+<option value="Luxemburgo">Luxemburgo</option>
+<option value="Macedonia del Norte">Macedonia del Norte</option>
+<option value="Malta">Malta</option>
+<option value="Marruecos">Marruecos</option>
+<option value="Moldavia">Moldavia</option>
+<option value="Montenegro">Montenegro</option>
+<option value="México">México</option>
+<option value="Mónaco">Mónaco</option>
+<option value="Noruega">Noruega</option>
+<option value="Nueva Zelanda">Nueva Zelanda</option>
+<option value="Países Bajos">Países Bajos</option>
+<option value="Polonia">Polonia</option>
+<option value="Portugal">Portugal</option>
+<option value="Reino Unido">Reino Unido</option>
+<option value="República Checa">República Checa</option>
+<option value="Rumanía">Rumanía</option>
+<option value="Rusia">Rusia</option>
+<option value="San Marino">San Marino</option>
+<option value="Serbia">Serbia</option>
+<option value="Suecia">Suecia</option>
+<option value="Suiza">Suiza</option>
+<option value="Turquía">Turquía</option>
+<option value="Ucrania">Ucrania</option>
+<option value="Uruguay">Uruguay</option>
+<option value="Vaticano">Vaticano</option>
+</select></div><div class="field hidden" id="profileCcaaWrap"><label>Comunidad autónoma</label><select id="profileCcaa"></select></div><div class="field hidden" id="profileNationalityOtherWrap"><label>Otra nacionalidad</label><input id="profileNationalityOther" placeholder="Escribe la nacionalidad"/></div><div class="field"><label>Email</label><input disabled="" id="profileEmail" type="email"/></div></div><div class="form-actions"><button class="ghost-btn" onclick="showPage('home')">Cancelar</button><button class="submit-btn" onclick="saveProfile()">Guardar cambios</button></div></div></div></section>
+
+<section class="page" id="teams">
+  <div class="teams-hero">
+    <div class="hero-card">
+      <p class="eyebrow">Comunidad ACC</p>
+      <h1>Equipos</h1>
+      <p>Galería oficial de equipos de la comunidad. Pulsa en cualquier equipo para ver sede, dirección, redes y pilotos.</p>
+      <div><button class="pill-btn primary" onclick="showPage('createTeam')">Crear mi equipo</button></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div class="panel-title">👥 Equipos de la comunidad</div><div class="panel-kicker">Assetto Corsa Community</div></div>
+    <div class="panel-body">
+      <div class="teams-gallery" id="teamsGallery"></div>
+    </div>
+  </div>
+</section>
+<div id="teamModal" class="team-modal" onclick="teamModalBackdrop(event)">
+  <div class="team-modal-content">
+    <button class="team-modal-close" onclick="closeTeamModal()">×</button>
+    <div class="team-modal-body">
+      <div class="team-modal-side">
+        <img id="teamModalImg" class="team-modal-logo" src="" alt="Logo equipo">
+        <h1 id="teamModalName" class="team-modal-name"></h1>
+        <p class="team-subtitle">Simracing</p>
+        <div class="team-blue-bar"></div>
+      </div>
+      <div>
+        <div id="teamModalJoin"></div>
+        <div id="teamModalInfo" class="team-info"></div>
+        <h3 class="team-section-title">Redes Sociales</h3>
+        <div id="teamModalSocial" class="team-social"></div>
+        <h3 class="team-section-title">Dirección</h3>
+        <div id="teamModalDirector"></div>
+        <h3 class="team-section-title">Miembros / Pilotos</h3>
+        <div id="teamModalMembers" class="team-members-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pilotModal" class="team-modal" onclick="pilotModalBackdrop(event)">
+  <div class="team-modal-content">
+    <button class="team-modal-close" onclick="closePilotModal()">×</button>
+    <div class="team-modal-body">
+      <div class="team-modal-side">
+        <div id="pilotModalAvatar" class="team-avatar" style="height:260px;border-radius:16px;overflow:hidden"></div>
+        <h1 id="pilotModalName" class="team-modal-name"></h1>
+        <p class="team-subtitle">Historial del piloto</p>
+        <div class="team-blue-bar"></div>
+      </div>
+      <div>
+        <h3 class="team-section-title">Pruebas disputadas en la comunidad</h3>
+        <div id="pilotModalHistory" class="pilot-history-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<section class="page" id="licenses">
+  <div class="hero">
+    <div class="hero-card">
+      <p class="eyebrow">Licencias oficiales</p>
+      <h1>Licencias ACC</h1>
+      <p>Pide tu licencia de piloto o la de tu equipo: se asigna al momento, se añade a tu perfil y te la enviamos por email.</p>
+    </div>
+  </div>
+
+  <div class="admin-two">
+    <div class="form-card" style="max-width:none;margin:0" id="pilotLicenseCard"></div>
+    <div class="form-card" style="max-width:none;margin:0" id="teamLicenseCard"></div>
+  </div>
+</section>
+
+<section class="page" id="createTeam">
+  <div class="form-card">
+    <p class="eyebrow">Nuevo equipo</p>
+    <h1>Crear equipo</h1>
+    <div id="createTeamBody"></div>
+  </div>
+</section>
+<section class="page" id="admin"><div id="adminContent"></div></section>
+</main>
+</div>
+<div class="registration-table-modal" id="registrationTableModal">
+  <div class="registration-table-modal-head">
+    <div>
+      <div class="registration-table-modal-title">Inscripciones por evento</div>
+      <div class="registration-table-modal-subtitle" id="registrationTableModalSubtitle"></div>
+    </div>
+    <button class="ghost-btn" onclick="closeRegistrationTableModal()">Cerrar</button>
+  </div>
+  <div class="registration-table-modal-body" id="registrationTableModalBody"></div>
+</div>
+<div class="registration-table-modal" id="downloadLogModal">
+  <div class="registration-table-modal-head">
+    <div>
+      <div class="registration-table-modal-title">Registro de descargas</div>
+      <div class="registration-table-modal-subtitle" id="downloadLogModalSubtitle"></div>
+    </div>
+    <button class="ghost-btn" onclick="closeDownloadLogModal()">Cerrar</button>
+  </div>
+  <div class="registration-table-modal-body" id="downloadLogModalBody"></div>
+</div>
+<div class="registration-table-modal" id="resultsModal">
+  <div class="registration-table-modal-head">
+    <div>
+      <div class="registration-table-modal-title" id="resultsModalTitle">Resultados</div>
+      <div class="registration-table-modal-subtitle" id="resultsModalSubtitle"></div>
+    </div>
+    <button class="ghost-btn" onclick="closeFinishedResults()">Cerrar</button>
+  </div>
+  <div class="registration-table-modal-body results-modal-body" id="resultsModalBody"></div>
+</div>
+<div id="licenseModal" class="team-modal" onclick="if(event.target===this)closeLicensePopup()">
+  <div class="team-modal-content lic-popup">
+    <button class="team-modal-close" onclick="closeLicensePopup()">×</button>
+    <div id="licenseModalBody"></div>
+  </div>
+</div><div class="history-modal" id="registrationHistoryModal" onclick="closeRegistrationHistoryModal(event)">
+  <div class="history-modal-content" onclick="event.stopPropagation()">
+    <div class="history-modal-head">
+      <div>
+        <div class="history-modal-title" id="registrationHistoryTitle">Historial de cambios</div>
+        <div class="history-modal-subtitle" id="registrationHistorySubtitle"></div>
+      </div>
+      <button class="history-modal-close" onclick="closeRegistrationHistoryModal()" aria-label="Cerrar">X</button>
+    </div>
+    <div class="history-modal-body" id="registrationHistoryBody"></div>
+  </div>
+</div><div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+<script src="admin.js"></script>
+<script src="community.js"></script>
+<script src="extras.js"></script>
+<script src="teams-licenses.js"></script>
+</body>
+</html>
+
+
