@@ -38,6 +38,8 @@ function onPageShown(id){
   else if(id==='pruebas')loadFinishedEvents();
   else if(id==='licenses')renderLicensesPage();
   else if(id==='createTeam')renderCreateTeamForm();
+  else if(id==='championships')renderChampionshipsPage();
+  if(typeof afterPageShown==='function')afterPageShown(id);
 }
 
 /* =====================================================================
@@ -277,7 +279,7 @@ async function loadHomeExtras(){
   loadHomeFinished().then(()=>{if(done)done.textContent=finishedState.items.length});
   const teams=$('homeStatTeams'),events2=$('homeStatEvents'),pilots=$('homeStatPilots');
   if(teams)teams.textContent=embeddedTeamsData.length;
-  if(events2)events2.textContent=(typeof events!=='undefined'?events.filter(isUpcomingEvent).length:0);
+  if(events2)events2.textContent=(typeof events!=='undefined'?events.filter(isListedUpcomingEvent).length:0);
   if(pilots){
     const total=await homePilotCount();
     pilots.textContent=total;
@@ -577,7 +579,7 @@ async function loadSafetyPage(){
   <div class="sr-hero">
     <div class="sr-ring" style="--pct:${pct}%;--lic:${srRing(c)}"><div class="sr-ring-in"><span class="sr-class" style="color:${srRing(c)}">${c.key}</span><b>${fmtSr(res.sr)}</b><small>Safety Rating</small></div></div>
     <div class="sr-hero-main">
-      <p class="eyebrow">Licencia ACC</p>
+      <p class="eyebrow">Licencia VRC</p>
       <h1>${escHtml(c.name)}</h1>
       <p class="sr-progress-text">${srProgressText(res)}</p>
       <div class="sr-bar"><div class="sr-bar-fill" style="width:${pct}%;background:${srRing(c)}"></div><span class="sr-mark demote" style="left:${SR_RULES.demote/5*100}%"><i>${fmtSr(SR_RULES.demote)}</i></span><span class="sr-mark promote" style="left:${SR_RULES.promote/5*100}%"><i>${fmtSr(SR_RULES.promote)}</i></span></div>

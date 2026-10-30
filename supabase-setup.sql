@@ -496,3 +496,51 @@ create policy "acc_media_update" on storage.objects for update to authenticated
 drop policy if exists "acc_media_delete" on storage.objects;
 create policy "acc_media_delete" on storage.objects for delete to authenticated
   using (bucket_id = 'acc-media' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- =====================================================================
+-- OCTUBRE 2026 (2) · Virtual Rally Championship
+-- Subida de skins, código del tablón, requisito de Safety Rating,
+-- temporada de cada prueba y logo/calendario de cada campeonato.
+-- Idempotente: se puede ejecutar varias veces.
+-- =====================================================================
+alter table public.events        add column if not exists skins_url       text;
+alter table public.events        add column if not exists codigo_tablon   text;
+alter table public.events        add column if not exists licencia_minima text;
+alter table public.events        add column if not exists sr_minimo       numeric(4,2);
+alter table public.events        add column if not exists temporada       integer;
+alter table public.championships add column if not exists logo_url        text;
+alter table public.championships add column if not exists calendario_url  text;
+alter table public.championships add column if not exists temporada       integer;
+
+-- Las pruebas que ya existen toman la temporada del año de su primera sesión
+-- (o, si no tienen sesiones, del cierre/apertura de inscripciones).
+update public.events e
+   set temporada = coalesce(
+         (select extract(year from min(nullif(s.fecha_hora::text, '')::timestamptz))::int from public.sessions s where s.event_id = e.id),
+         extract(year from nullif(coalesce(e.inscripcion_cierre::text, e.inscripcion_apertura::text), '')::timestamptz)::int)
+ where e.temporada is null;
+
+-- ---------------------------------------------------------------------
+-- Fecha de la prueba para el calendario (mientras no tenga sesiones)
+-- ---------------------------------------------------------------------
+alter table public.events add column if not exists fecha_prueba date;
+
+-- ---------------------------------------------------------------------
+-- CCRT 2027 · Campeonato de Canarias de Rallys de Tierra
+-- Calendario provisional. El logo y el cartel salen solos de la web
+-- (imgs/ccrt-logo.png e imgs/ccrt-calendario-2027.jpg). Las sesiones y
+-- las fechas de inscripción se añaden después desde el panel admin.
+-- No pisa nada si ya existe (on conflict do nothing).
+-- ---------------------------------------------------------------------
+insert into public.championships (id, nombre, mostrar_clasificaciones, temporada)
+values ('ccrt-2027', 'CCRT 2027', true, 2027)
+on conflict (id) do nothing;
+
+insert into public.events (id, nombre, subtitulo, descripcion, estado, championship_id, orden_clasificacion, requiere_copiloto, fecha_prueba, temporada)
+values
+  ('ccrt27-la-oliva',       'Rally La Oliva',                        'Rally de tierra · Fuerteventura', '15, 16 y 17 de enero de 2027',    'Próximamente', 'ccrt-2027', 1, true, '2027-01-15', 2027),
+  ('ccrt27-isla-verde',     'Rally Tierra Isla Verde',               'Rally de tierra · La Palma',      '29, 30 y 31 de enero de 2027',    'Próximamente', 'ccrt-2027', 2, true, '2027-01-29', 2027),
+  ('ccrt27-teide',          'Rally del Teide',                       'Rally de tierra · Tenerife',      '12, 13 y 14 de febrero de 2027',  'Próximamente', 'ccrt-2027', 3, true, '2027-02-12', 2027),
+  ('ccrt27-gran-canaria',   'Rally Tierra de Gran Canaria',          'Rally de tierra · Gran Canaria',  '26, 27 y 28 de febrero de 2027',  'Próximamente', 'ccrt-2027', 4, true, '2027-02-26', 2027),
+  ('ccrt27-isla-volcanes',  'Rally Tierra Isla de los Volcanes',     'Rally de tierra · Lanzarote',     '12, 13 y 14 de marzo de 2027',    'Próximamente', 'ccrt-2027', 5, true, '2027-03-12', 2027)
+on conflict (id) do nothing;

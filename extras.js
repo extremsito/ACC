@@ -357,7 +357,7 @@ async function loadFinishedEvents(){
       if(rows.some(x=>(row.pilotId&&x.pilotId===row.pilotId)||normalizeDriverName(x.name)===normalizeDriverName(row.name)))return;
       rows.push(row);
     });
-    items.push({name:e.name,subtitle:e.subtitle,championship:e.championship,plate:e.plateUrl,date,year:new Date(date||Date.now()).getFullYear(),rows:sortResultRows(rows),eventId:e.id,manual:false});
+    items.push({name:e.name,subtitle:e.subtitle,championship:e.championship,plate:e.plateUrl,date,year:e.season||new Date(date||Date.now()).getFullYear(),rows:sortResultRows(rows),eventId:e.id,manual:false});
   });
 
   // Pruebas antiguas que solo existen como resultados cargados a mano.

@@ -108,7 +108,7 @@ function profileByManualResult(result){
 }
 function driverName(profile,registration){
   const name=`${profile?.nombre||""} ${profile?.apellido||""}`.trim();
-  return name||registration.pilot_id||"Piloto";
+  return name||registration?.pilot_name||"Piloto";
 }
 function championshipHasPublicStandings(championship){return championship?.mostrar_clasificaciones!==false}
 async function openStandings(){
@@ -121,13 +121,17 @@ async function loadStandingsData(){
   const [championships,eventsData,registrations,profiles,categories,championshipCategories,classificationResults,teamClassificationResults]=await Promise.all([
     safeSelect('championships','*','nombre',true),
     safeSelect('events','*','created_at',true),
-    safeSelect('registrations','*','created_at',true),
-    safeSelect('profiles','id,nombre,apellido,equipo,licencia_piloto,licencia_equipo','apellido',true),
+    selectAllRows('registrations','*','created_at'),
+    selectAllRows('profiles','id,nombre,apellido,equipo,licencia_piloto,licencia_equipo','id'),
     safeSelect('categories','*','nombre',true),
     safeSelect('championship_categories','*',null,true),
-    safeSelect('classification_results','*','created_at',true),
-    safeSelect('team_classification_results','*','created_at',true)
+    selectAllRows('classification_results','*','created_at'),
+    selectAllRows('team_classification_results','*','created_at')
   ]);
+  // Sin sesión de admin la tabla profiles solo devuelve tu perfil: el resto de nombres sale de public_pilots().
+  const dir=await pilotDirLoad();
+  const known=new Set(profiles.map(p=>p.id));
+  dir.rows.forEach(p=>{if(!known.has(p.id))profiles.push({...p,licencia_piloto:'',licencia_equipo:''})});
   const publicChampionships=championships.filter(championshipHasPublicStandings);
   standingsState={...standingsState,championships:publicChampionships,events:eventsData,registrations,profiles,categories,championshipCategories,classificationResults,teamClassificationResults};
   if(!standingsState.selectedChampionshipId||!publicChampionships.some(c=>c.id===standingsState.selectedChampionshipId))standingsState.selectedChampionshipId=publicChampionships[0]?.id||"";
@@ -252,14 +256,14 @@ function renderStandingTable(championshipId,view){
 function setStandingsChampionship(value){standingsState.selectedChampionshipId=value;standingsState.selectedView='general';renderStandings()}
 function setStandingsView(value){standingsState.selectedView=value;renderStandings()}
 function renderStandings(){
-  if(!standingsState.championships.length){$('standingsContent').innerHTML=`<div class="panel"><div class="panel-head"><div><p class="eyebrow">Campeonatos</p><div class="panel-title">Clasificaciones</div></div><div class="panel-kicker">Assetto Corsa Community</div></div><div class="panel-body"><p class="empty">No hay campeonatos con clasificaciones visibles en la web.</p></div></div>`;return}
+  if(!standingsState.championships.length){$('standingsContent').innerHTML=`<div class="panel"><div class="panel-head"><div><p class="eyebrow">Campeonatos</p><div class="panel-title">Clasificaciones</div></div><div class="panel-kicker">Virtual Rally Championship</div></div><div class="panel-body"><p class="empty">No hay campeonatos con clasificaciones visibles en la web.</p></div></div>`;return}
   const champId=standingsState.selectedChampionshipId;
   const championship=standingsState.championships.find(c=>c.id===champId)||{};
   const categories=standingsCategories(champId);
   const tabs=[{id:'general',label:'General'},...categories.map(c=>({id:c.nombre,label:c.nombre})),{id:TEAM_STANDINGS_VIEW,label:'Equipos'}];
   if(!tabs.some(t=>t.id===standingsState.selectedView))standingsState.selectedView='general';
   const champOptions=standingsState.championships.map(c=>`<option value="${escapeAttr(c.id)}" ${c.id===champId?'selected':''}>${escapeAttr(c.nombre||c.id)}</option>`).join('');
-  $('standingsContent').innerHTML=`<div class="panel"><div class="panel-head"><div><p class="eyebrow">Campeonatos</p><div class="panel-title">Clasificaciones</div></div><div class="panel-kicker">Assetto Corsa Community</div></div><div class="panel-body"><div class="standings-toolbar"><div class="field"><label>Campeonato</label><select onchange="setStandingsChampionship(this.value)">${champOptions}</select></div><div class="standings-tabs">${tabs.map(t=>`<button class="standings-tab ${t.id===standingsState.selectedView?'active':''}" onclick="setStandingsView('${escapeAttr(t.id)}')">${escapeAttr(t.label)}</button>`).join('')}</div></div><h2>${escapeAttr(championship.nombre||'Campeonato')}</h2>${standingsState.selectedView===TEAM_STANDINGS_VIEW?renderTeamStandingTable(champId):renderStandingTable(champId,standingsState.selectedView)}</div></div>`;
+  $('standingsContent').innerHTML=`<div class="panel"><div class="panel-head"><div><p class="eyebrow">Campeonatos</p><div class="panel-title">Clasificaciones</div></div><div class="panel-kicker">Virtual Rally Championship</div></div><div class="panel-body"><div class="standings-toolbar"><div class="field"><label>Campeonato</label><select onchange="setStandingsChampionship(this.value)">${champOptions}</select></div><div class="standings-tabs">${tabs.map(t=>`<button class="standings-tab ${t.id===standingsState.selectedView?'active':''}" onclick="setStandingsView('${escapeAttr(t.id)}')">${escapeAttr(t.label)}</button>`).join('')}</div></div><h2>${escapeAttr(championship.nombre||'Campeonato')}</h2>${standingsState.selectedView===TEAM_STANDINGS_VIEW?renderTeamStandingTable(champId):renderStandingTable(champId,standingsState.selectedView)}</div></div>`;
 }
 function scrollToEvents(){$("eventsBlock").scrollIntoView({behavior:"smooth"})}
 function getSpainTime(){const now=new Date();return new Date(now.toLocaleString("en-US",{timeZone:"Europe/Madrid"}))}
@@ -390,20 +394,21 @@ async function loadPublicEvents(){
       };
     }).filter(Boolean);
 
-    return {id:ev.id,name:ev.nombre,subtitle:ev.subtitulo||"Prueba ACC",championship:championship?.nombre||"Sin campeonato",championshipId:ev.championship_id||"",description:ev.descripcion||"",registrationOpen:fmtDate(ev.inscripcion_apertura),registrationClose:fmtDate(ev.inscripcion_cierre),registrationOpenRaw:ev.inscripcion_apertura,registrationCloseRaw:ev.inscripcion_cierre,officialBoardUrl:ev.tablon_url||"#",plateUrl:ev.placa_url||"",posterUrl:ev.cartel_url||"",status:ev.estado||"draft",requiereCopiloto:ev.requiere_copiloto!==false,drivers:registrations.filter(r=>r.event_id===ev.id).length,distance:ev.distancia_total||"—",categories:eventCategories,cars:eventCars,sessions:evSessions,sessionFiles};
+    return {id:ev.id,name:ev.nombre,subtitle:ev.subtitulo||"Prueba VRC",championship:championship?.nombre||"Sin campeonato",championshipId:ev.championship_id||"",description:ev.descripcion||"",registrationOpen:fmtDate(ev.inscripcion_apertura),registrationClose:fmtDate(ev.inscripcion_cierre),registrationOpenRaw:ev.inscripcion_apertura,registrationCloseRaw:ev.inscripcion_cierre,officialBoardUrl:ev.tablon_url||"#",plateUrl:ev.placa_url||"",posterUrl:ev.cartel_url||"",status:ev.estado||"draft",skinsUrl:ev.skins_url||"",boardCode:ev.codigo_tablon||"",minLicense:ev.licencia_minima||"",minSr:ev.sr_minimo!=null&&ev.sr_minimo!==""?Number(ev.sr_minimo):null,season:Number(ev.temporada)||null,eventDate:ev.fecha_prueba||"",requiereCopiloto:ev.requiere_copiloto!==false,drivers:registrations.filter(r=>r.event_id===ev.id).length,distance:ev.distancia_total||"—",categories:eventCategories,cars:eventCars,sessions:evSessions,sessionFiles};
   });
 
   if(!currentEventId && events.length)currentEventId=events[0].id;
   renderHome();
 }
 function renderHome(){
+  if(typeof updateNextRace==="function")updateNextRace();
   const grid=$("eventsGrid");
-  const upcomingEvents=events.filter(isUpcomingEvent);
+  const upcomingEvents=events.filter(isListedUpcomingEvent);
   if(!upcomingEvents.length){
     grid.innerHTML='<div class="event-card"><h2>No hay eventos próximos</h2><p class="empty">Cuando haya pruebas vigentes aparecerán aquí automáticamente.</p></div>';
     return;
   }
-  grid.innerHTML=upcomingEvents.map(e=>`<article class="event-card">${e.plateUrl?`<img class="event-plate" src="${e.plateUrl}" alt="Placa ${e.name}" loading="lazy">`:""}<div><p class="eyebrow">${e.championship||"Campeonato"} · ${e.subtitle||"Prueba ACC"}</p><h2>${e.name}</h2><p class="empty">${e.description||""}</p></div><div class="event-meta"><div class="mini-stat"><b>${e.drivers||0}</b><span>Inscritos</span></div><div class="mini-stat"><b>${e.distance||"—"}</b><span>Kilometraje total</span></div><div class="mini-stat"><b>${e.status||"—"}</b><span>Estado</span></div></div><button class="wide-btn primary" onclick="openEvent('${e.id}')">Ver más detalles</button></article>`).join("")
+  grid.innerHTML=upcomingEvents.map(e=>`<article class="event-card">${e.plateUrl?`<img class="event-plate" src="${e.plateUrl}" alt="Placa ${e.name}" loading="lazy">`:""}<div><p class="eyebrow">${e.championship||"Campeonato"} · ${e.subtitle||"Prueba VRC"}</p><h2>${e.name}</h2><p class="empty">${e.description||""}</p></div><div class="event-meta"><div class="mini-stat"><b>${e.drivers||0}</b><span>Inscritos</span></div><div class="mini-stat"><b>${e.distance||"—"}</b><span>Kilometraje total</span></div><div class="mini-stat"><b>${e.status||"—"}</b><span>Estado</span></div></div><button class="wide-btn primary" onclick="openEvent('${e.id}')">Ver más detalles</button></article>`).join("")
 }
 function getEntry(eventId){
   const remote=myRegistrations.find(r=>r.event_id===eventId);
@@ -431,11 +436,11 @@ async function recordFileDownloadById(eventId,sessionId,fileKey){
   }catch(e){console.warn('No se pudo registrar la descarga:',e)}
 }
 function renderSessionFiles(event){const entry=getEntry(event.id);if(!entry)return `<div class="notice">Los archivos estarán disponibles cuando te inscribas en una sesión de la prueba</div>`;if(entry.approvalStatus!=="approved")return `<div class="notice">Tu inscripción está pendiente de aprobación. Los archivos estarán disponibles cuando la administración acepte tu inscripción.</div>`;const session=event.sessions.find(s=>s.id===entry.sessionId);const files=event.sessionFiles[entry.sessionId]||[];if(!files.length)return `<div class="notice">Estás inscrito en esta sesión, pero todavía no hay archivos publicados para ella.</div>`;return `<div class="session-file-group"><div class="session-file-title">${session?`${session.name} · ${session.date} · ${session.time}`:"Tu sesión"}</div>${files.map((file,i)=>{const visible=isFileVisible(file),count=getCountdownText(file),fileKey=escapeAttr(String(file.id||file.url||i));return `<div class="file-row"><div class="round-number">${i+1}</div><div class="file-info"><strong>${escapeAttr(file.title)}</strong><span>${escapeAttr(file.description)}${count?`<span class="countdown">${escapeAttr(count)}</span>`:""}</span></div><div class="file-type">Archivo</div>${visible?`<a class="file-btn" href="${escapeAttr(file.url)}" target="_blank" rel="noopener noreferrer" onclick="recordFileDownloadById('${escapeAttr(event.id)}','${escapeAttr(entry.sessionId)}','${fileKey}')">${escapeAttr(file.button)}</a>`:`<span class="file-btn disabled">Próximamente</span>`}</div>`}).join("")}</div>`}
-function openEvent(id){currentEventId=id;const e=events.find(x=>x.id===id);if(!e){toast("Evento no encontrado o todavía no está cargado.");showPage("home");return}const entry=getEntry(id);$("eventContent").innerHTML=`<div class="layout"><div class="stack"><section class="panel"><div class="panel-head"><div class="panel-title">📄 Documentos oficiales</div><div class="panel-kicker">Assetto Corsa Community</div></div><div class="panel-body"><div class="notice">Tablón de anuncios oficial de la prueba.<br><br><a class="pill-btn primary" href="${e.officialBoardUrl}" target="_blank" rel="noopener noreferrer">Abrir tablón de anuncios</a></div></div></section><section class="panel"><div class="panel-head"><div class="panel-title">🚦 Sesiones</div></div><div class="panel-body"><div class="notice">Los horarios de las sesiones están adaptados a la zona horaria local de cada participante.</div><table><thead><tr><th>#</th><th>Fecha y hora</th><th>Plazas</th><th>Estado</th><th>Inscripción</th></tr></thead><tbody>${e.sessions.map((s,i)=>`<tr><td>${i+1}</td><td><strong>${s.date}</strong><br><span style="color:var(--blue);font-weight:900">${s.time}</span></td><td>${s.taken}/${s.max}</td><td><span class="badge ${s.state==="Open"?"open":"closed"}">${s.state}</span></td><td><span class="badge ${entry&&entry.sessionId===s.id?"open":"closed"}">${entry&&entry.sessionId===s.id?"Inscrito":"No inscrito"}</span></td></tr>`).join("")}</tbody></table></div></section><section class="panel"><div class="panel-head"><div class="panel-title">📦 Archivos de la prueba</div></div><div class="panel-body" id="sessionFilesBox">${renderSessionFiles(e)}</div></section></div><aside class="panel summary"><div class="panel-head"><div class="panel-title">Información de la prueba</div></div><div class="panel-body"><div class="summary-row"><span class="label">Comienzo periodo de inscripciones</span><span class="value">${e.registrationOpen}</span></div><div class="summary-row"><span class="label">Fin periodo de inscripciones</span><span class="value">${e.registrationClose}</span></div><div class="summary-row"><span class="label">Pilotos inscritos provisionales</span><span class="value">${e.drivers}</span></div><div class="summary-row"><span class="label">Kilometraje total total</span><span class="value">${e.distance}</span></div><div class="summary-row"><span class="label">Campeonato</span><span class="value">${e.championship||"—"}</span></div>${e.posterUrl?`<div class="event-poster-summary"><div class="label">Cartel de la prueba</div><img class="event-poster" src="${e.posterUrl}" alt="Cartel ${e.name}" loading="lazy"></div>`:""}${entry?`
-<div class="notice"><b>Ya estás inscrito.</b><br>Sesión: ${e.sessions.find(s=>s.id===entry.sessionId)?.name||"—"}<br>Categoría: ${entry.category}<br>Coche: ${entry.car}</div>
+function openEvent(id){currentEventId=id;const e=events.find(x=>x.id===id);if(!e){toast("Evento no encontrado o todavía no está cargado.");showPage("home");return}const entry=getEntry(id);$("eventContent").innerHTML=`<div class="layout"><div class="stack"><section class="panel"><div class="panel-head"><div class="panel-title">📄 Documentos oficiales</div><div class="panel-kicker">Virtual Rally Championship</div></div><div class="panel-body"><div class="notice">Tablón de anuncios oficial de la prueba.<br><br><div class="doc-actions"><a class="pill-btn primary" href="${e.officialBoardUrl}" target="_blank" rel="noopener noreferrer">Abrir tablón de anuncios</a>${e.skinsUrl?`<a class="pill-btn skins-btn" href="${escapeAttr(e.skinsUrl)}" target="_blank" rel="noopener noreferrer">🎨 Subir skins</a>`:""}</div>${e.skinsUrl?'<small class="doc-hint">Sube la skin de tu coche a la carpeta de Drive de la prueba.</small>':""}</div></div></section><section class="panel"><div class="panel-head"><div class="panel-title">🚦 Sesiones</div></div><div class="panel-body"><div class="notice">Los horarios de las sesiones están adaptados a la zona horaria local de cada participante.</div><table><thead><tr><th>#</th><th>Fecha y hora</th><th>Plazas</th><th>Estado</th><th>Inscripción</th></tr></thead><tbody>${e.sessions.map((s,i)=>`<tr><td>${i+1}</td><td><strong>${s.date}</strong><br><span style="color:var(--blue);font-weight:900">${s.time}</span></td><td>${s.taken}/${s.max}</td><td><span class="badge ${s.state==="Open"?"open":"closed"}">${s.state}</span></td><td><span class="badge ${entry&&entry.sessionId===s.id?"open":"closed"}">${entry&&entry.sessionId===s.id?"Inscrito":"No inscrito"}</span></td></tr>`).join("")}</tbody></table></div></section><section class="panel"><div class="panel-head"><div class="panel-title">📦 Archivos de la prueba</div></div><div class="panel-body" id="sessionFilesBox">${renderSessionFiles(e)}</div></section></div><aside class="panel summary"><div class="panel-head"><div class="panel-title">Información de la prueba</div></div><div class="panel-body"><div class="summary-row"><span class="label">Comienzo periodo de inscripciones</span><span class="value">${e.registrationOpen}</span></div><div class="summary-row"><span class="label">Fin periodo de inscripciones</span><span class="value">${e.registrationClose}</span></div><div class="summary-row"><span class="label">Pilotos inscritos provisionales</span><span class="value">${e.drivers}</span></div><div class="summary-row"><span class="label">Kilometraje total total</span><span class="value">${e.distance}</span></div><div class="summary-row"><span class="label">Campeonato</span><span class="value">${e.championship||"—"}</span></div>${eventHasSrRequirement(e)?`<div class="summary-row"><span class="label">Licencia mínima</span><span class="value" id="eventSrRequirement">${srRequirementText(e)}</span></div>`:""}${e.posterUrl?`<div class="event-poster-summary"><div class="label">Cartel de la prueba</div><img class="event-poster" src="${e.posterUrl}" alt="Cartel ${e.name}" loading="lazy"></div>`:""}${entry?`
+<div class="notice"><b>Ya estás inscrito.</b><br>Sesión: ${e.sessions.find(s=>s.id===entry.sessionId)?.name||"—"}<br>Categoría: ${entry.category}<br>Coche: ${entry.car}<div class="board-code">Código Tablón: <b>${e.boardCode?escapeAttr(e.boardCode):"pendiente de publicar"}</b></div></div>
 <button class="wide-btn ${canChangeSession(e,entry)?'primary':''}" ${canChangeSession(e,entry)?`onclick="startSessionChange('${e.id}')"`:"disabled"}>Cambiar sesión ${entry.sessionChangeCount||0}/1</button>
 <button class="wide-btn ${canChangeVehicle(e,entry)?'primary':''}" ${canChangeVehicle(e,entry)?`onclick="startVehicleChange('${e.id}')"`:"disabled"}>Cambiar coche/categoría ${entry.vehicleChangeCount||0}/1</button>
-`:`<button class="wide-btn ${isRegistrationOpen(e)?"primary":""}" ${isRegistrationOpen(e)?`onclick="startEntry('${e.id}')"`:"disabled"}>${registrationHasClosed(e)?"Inscripciones cerradas":(!registrationHasOpened(e)?"Inscripciones no abiertas":"Inscribirse")}</button>`}<button class="wide-btn" onclick="showPage('home')">Volver a eventos</button></div></aside></div>`;showPage("event")}
+`:`<button class="wide-btn ${isRegistrationOpen(e)?"primary":""}" id="eventEntryBtn" ${isRegistrationOpen(e)?`onclick="startEntry('${e.id}')"`:"disabled"}>${registrationHasClosed(e)?"Inscripciones cerradas":(!registrationHasOpened(e)?"Inscripciones no abiertas":"Inscribirse")}</button>`}<button class="wide-btn" onclick="showPage('pruebas')">Volver a eventos</button></div></aside></div>`;showPage("event");if(!entry&&isRegistrationOpen(e))markEntryButtonBySr(e)}
 function refreshSessionFilesOnly(){const box=$("sessionFilesBox");if(!box)return;const e=events.find(x=>x.id===currentEventId);if(!e)return;box.innerHTML=renderSessionFiles(e)}
 function updateEntryCars(){
   const e=events.find(x=>x.id===currentEventId);
@@ -459,9 +464,13 @@ function getLastSessionStart(event){
   if(rawDates.length)return new Date(Math.max(...rawDates.map(d=>d.getTime())));
   return null;
 }
+// En Pruebas no se enseñan aún las de temporadas futuras (p. ej. 2027): se ven en Campeonatos.
+function isFutureSeasonEvent(event){return Number(event?.season)>getSpainTime().getFullYear()}
+function isListedUpcomingEvent(event){return isUpcomingEvent(event)&&!isFutureSeasonEvent(event)}
 function isUpcomingEvent(event){
   const last=getLastSessionStart(event);
-  if(!last)return true;
+  // Sin sesiones todavía: se usa la fecha de la prueba del calendario (si la hay) y se oculta 3 días después.
+  if(!last){const day=getSpainWallTime(madridWallTimeToInstant(event.eventDate));return !day||getSpainTime()<new Date(day.getTime()+3*24*60*60*1000)}
   const hideAt=new Date(last.getTime()+8*60*60*1000);
   return getSpainTime()<hideAt;
 }
@@ -532,7 +541,7 @@ function toggleEntryCodriverFields(event){
     if($("coNationalityOtherWrap"))$("coNationalityOtherWrap").classList.add("hidden");
   }
 }
-function startEntry(id){
+async function startEntry(id){
   entryMode="new";
   resetEntryFormState();
   if(!currentUser){toast("Debes iniciar sesión antes de inscribirte.");showPage("login");return}
@@ -542,6 +551,8 @@ function startEntry(id){
   if(!isRegistrationOpen(e))return toast(registrationHasClosed(e)?"Las inscripciones de esta prueba ya estan cerradas.":"Las inscripciones de esta prueba todavia no estan abiertas.");
   if(!e.sessions.length){toast("Este evento todavía no tiene sesiones configuradas.");return}
   if(!e.categories.length||!e.cars.length){toast("El campeonato de este evento todavía no tiene coches o categorías configuradas.");return}
+  const sr=await checkSrRequirement(e);
+  if(!sr.ok)return toast(sr.message);
   $("entryTitle").textContent=e.name;
   $("categorySelect").innerHTML=e.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join("");
   $("categorySelect").onchange=updateEntryCars;
@@ -659,7 +670,7 @@ async function resetPassword(){
 }
 
 async function logoutUser(){await supabaseClient.auth.signOut();currentUser=null;localStorage.removeItem("acc_user");clearAllLocalEntries();myRegistrations=[];updateUserMenu();toast("Sesión cerrada.");showPage("home")}
-function updateUserMenu(){const logged=!!currentUser,isAdmin=currentUser?.role==="admin";$("userChip").textContent=logged?`✅ ${currentUser.name} ${currentUser.lastName||""}`:"";$("userChip").classList.toggle("visible",logged);$("menuLogin").classList.toggle("hidden",logged);$("menuRegister").classList.toggle("hidden",logged);$("menuProfile").classList.toggle("hidden",!logged);$("menuSafety").classList.toggle("hidden",!logged);$("menuLogout").classList.toggle("hidden",!logged);$("menuAdmin").classList.toggle("hidden",!isAdmin);$("adminNavBtn").classList.toggle("hidden",!isAdmin)}
+function updateUserMenu(){const logged=!!currentUser,isAdmin=currentUser?.role==="admin";if(typeof updateAccountButton==="function")updateAccountButton();$("userChip").textContent=logged?`✅ ${currentUser.name} ${currentUser.lastName||""}`:"";$("userChip").classList.toggle("visible",logged);$("menuLogin").classList.toggle("hidden",logged);$("menuRegister").classList.toggle("hidden",logged);$("menuProfile").classList.toggle("hidden",!logged);$("menuSafety").classList.toggle("hidden",!logged);$("menuLogout").classList.toggle("hidden",!logged);$("menuAdmin").classList.toggle("hidden",!isAdmin);$("adminNavBtn").classList.toggle("hidden",!isAdmin)}
 function openProfile(){if(!currentUser){toast("Debes iniciar sesion.");showPage("login");return}$("profileName").value=currentUser.name||"";$("profileLastName").value=currentUser.lastName||"";$("profileSteam").value=currentUser.steam||"";$("profileLicense").value=currentUser.license||"";$("profileTeam").value=currentUser.team||"";$("profileTeamLicense").value=currentUser.teamLicense||"";setNationalityValue("profileNationality","profileNationalityOther","profileCcaaWrap","profileNationalityOtherWrap",currentUser.nationality||"");$("profileCcaa").value=currentUser.ccaa||"";$("profileEmail").value=currentUser.email||"";if(typeof renderImageField==="function")renderImageField("profileAvatarField","avatar",currentUser.avatar||"");showPage("profile")}
 async function saveProfile(){
   if(!currentUser)return toast("Sesion caducada.");
@@ -747,6 +758,8 @@ async function confirmEntry(){
   const coNationalityValue=needsCodriver?nationalityValue("coNationality","coNationalityOther"):"";
   const selectedSession=e.sessions.find(s=>s.id===$("sessionSelect").value);
   if(!sessionIsOpen(selectedSession))return toast("Esta sesion ya no tiene plazas disponibles.");
+  const sr=await checkSrRequirement(e);
+  if(!sr.ok)return toast(sr.message);
   const entry={coDriver:needsCodriver?$("coDriver").value.trim():"",coNationality:coNationalityValue,coCcaa:needsCodriver&&$("coNationality").value==="España"?$("coCcaa").value:"",category:categoryOption?categoryOption.textContent:$("categorySelect").value,car:$("carSelect").value,sessionId:$("sessionSelect").value,createdAt:new Date().toISOString(),sessionChangeCount:0,vehicleChangeCount:0};
   if(needsCodriver&&!entry.coDriver||needsCodriver&&!entry.coNationality)return toast("Rellena copiloto y nacionalidad del copiloto.");if(needsCodriver&&entry.coNationality==="España"&&!entry.coCcaa)return toast("Selecciona la comunidad autónoma del copiloto.");
   const {error}=await supabaseClient.from("registrations").insert({event_id:currentEventId,pilot_id:currentUser.id,copiloto:entry.coDriver,nacionalidad_copiloto:entry.coNationality,copiloto_comunidad_autonoma:entry.coCcaa,categoria:entry.category,coche:entry.car,session_id:entry.sessionId});
